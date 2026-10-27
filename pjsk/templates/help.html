@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="help-hero">
+  <div class="catalog-kicker">PJSK COMMAND GUIDE · {{ region_short }}</div>
+  <div class="help-title">PJSK 查询帮助</div>
+  <div class="help-desc">查卡、查曲、查活动、查卡池与模拟抽卡。默认查询{{ default_region_label }}；在命令前加 <b>cn</b> 或 <b>jp</b> 可随时切换服务器。所有结果都由 AstrBot t2i 渲染成图片。</div>
+  <div class="help-format">
+    <span>默认服务器<b>{{ default_region_label }}</b></span>
+    <span>切换服务器<b>cn / jp + 命令</b></span>
+    <span>抽卡命令需带<b>pjsk 或服务器前缀</b></span>
+    <span>图片渲染<b>AstrBot t2i</b></span>
+  </div>
+</div>
+
+<div class="command-group">
+  <div class="section-head" style="margin:0 0 4px"><span class="section-bar"></span><h2 class="section-title">服务器前缀</h2><span class="section-sub">不带前缀时使用默认服务器</span></div>
+  <div class="command-card">
+    <div class="command-head"><span class="command-name">cn / jp</span><span class="command-alias">国服 / 日服 / 简中 / 日</span></div>
+    <div class="command-body">
+      <div class="command-desc">前缀写在命令最前面，可与命令连写或留空格。默认查询{{ default_region_label }}，因此 {{ default_region_key }} 前缀可以省略。</div>
+      <div class="command-examples">
+        <span class="example-chip">{{ switch_region_key }}查卡 4</span>
+        <span class="example-chip">{{ default_region_key }}查卡 4</span>
+        <span class="example-chip">{{ switch_region_key }}查曲 1</span>
+        <span class="example-chip">{{ switch_region_key }} 查活动 200</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="command-group">
+  <div class="section-head" style="margin:18px 0 4px"><span class="section-bar"></span><h2 class="section-title">查询卡牌</h2><span class="section-sub">卡牌详情、筛选列表与卡面原图</span></div>
+
+  <div class="command-grid">
+  <div class="command-card">
+    <div class="command-head"><span class="command-name">查卡</span><span class="command-alias">查牌 / 查卡面 / 卡面 / 卡图 / 看卡 / 卡牌</span></div>
+    <div class="command-body">
+      <div class="command-desc">数字为卡牌 ID，直接打开详情；<b>miku-1</b>（或 miku/1）查该角色最新一张卡。带条件时按条件筛选卡牌，未实装卡在列表中标紫色「未实装」角标，也可以用「卡牌列表」。结果只有一张时也会直接打开详情。</div>
+      <div class="command-examples">
+        <span class="example-chip">{{ region_prefix }}查卡 123</span>
+        <span class="example-chip">{{ region_prefix }}查卡面 123</span>
+        <span class="example-chip">{{ region_prefix }}查卡 miku 4</span>
+        <span class="example-chip">{{ region_prefix }}查卡 miku-1</span>
+        <span class="example-chip">{{ region_prefix }}卡牌列表 miku 4</span>
+        <span class="example-chip">{{ region_prefix }}查卡 粉 4星 2025年</span>
+        <span class="example-chip">{{ region_prefix }}查卡 团分 4星</span>
+        <span class="example-chip">{{ region_prefix }}jp查卡 leak 4星</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="command-card">
+    <div class="command-head"><span class="command-name">card</span><span class="command-alias">卡面原图（仅英文）</span></div>
+    <div class="command-body">
+      <div class="command-desc">发送游戏原始卡面 PNG，仅支持卡牌 ID。4★/3★ 返回花前与花后，1–2★ 与生日卡只有花前。中文「查卡面」是查卡别名，不会发送原图。</div>
+      <div class="command-examples">
+        <span class="example-chip">{{ region_prefix }}card 123</span>
+        <span class="example-chip">pjskcard 123</span>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<div class="command-group">
+  <div class="section-head" style="margin:18px 0 4px"><span class="section-bar"></span><h2 class="section-title">查询歌曲</h2><span class="section-sub">歌曲详情、难度索引与曲绘</span></div>
+
+  <div class="command-grid">
+  <div class="command-card">
+    <div class="command-head"><span class="command-name">查曲</span><span class="command-alias">查歌 / 查歌曲 / song / music</span></div>
+    <div class="command-body">
+      <div class="command-desc">按歌名、中文翻译、别名、ID、活动或角色箱活查询。只给难度时显示等级索引；给等级时显示该等级全部歌曲。</div>
+      <div class="command-examples">
+        <span class="example-chip">{{ region_prefix }}查曲 Tell Your World</span>
+        <span class="example-chip">{{ region_prefix }}查曲 #123</span>
+        <span class="example-chip">{{ region_prefix }}查曲 -1</span>
+        <span class="example-chip">{{ region_prefix }}查曲 mnr1</span>
+        <span class="example-chip">{{ region_prefix }}查曲 MASTER 32</span>
+        <span class="example-chip">{{ region_prefix }}查曲 EX 30 32</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="command-card">
+    <div class="command-head"><span class="command-name">查曲绘</span><span class="command-alias">曲绘 / jacket</span></div>
+    <div class="command-body">
+      <div class="command-desc">发送歌曲封面 PNG 原图。唯一匹配时直接发送，多首匹配时返回歌曲列表。</div>
+      <div class="command-examples">
+        <span class="example-chip">{{ region_prefix }}查曲绘 123</span>
+        <span class="example-chip">{{ region_prefix }}查曲绘 Tell Your World</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="command-card">
+    <div class="command-head"><span class="command-name">随个</span><span class="command-alias">随机曲 / 随机歌曲</span></div>
+    <div class="command-body">
+      <div class="command-desc">从指定等级随机抽一首歌并显示详情，适合点歌或练习选曲。</div>
+      <div class="command-examples"><span class="example-chip">{{ region_prefix }}随个 32</span><span class="example-chip">{{ region_prefix }}随个 26</span></div>
+    </div>
+  </div>
+
+  <div class="command-card">
+    <div class="command-head"><span class="command-name">查谱面</span><span class="command-alias">谱面 / 谱面预览 / chart</span></div>
+    <div class="command-body">
+      <div class="command-desc">直接发送谱面图 PNG 原图（音符、曲绘完整，图内含曲名/难度/等级/BPM）。难度默认 MASTER，可写 ez/nm/hd/ex/ma/ap 或中文；谱面数据来自 pjsk.moe，以日服为准。</div>
+      <div class="command-examples">
+        <span class="example-chip">{{ region_prefix }}谱面 300</span>
+        <span class="example-chip">{{ region_prefix }}谱面 ザムザ ex</span>
+        <span class="example-chip">{{ region_prefix }}查谱面 1 append</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="command-card">
+    <div class="command-head"><span class="command-name">查定数</span><span class="command-alias">定数表 / 定数排行 / 难度排行</span></div>
+    <div class="command-body">
+      <div class="command-desc">按官方等级查歌或看整张等级表，按等级降序排列。数据只取 MasterData 的 playLevel（不依赖社区定数表），支持单级（32）与区间（30-32）。</div>
+      <div class="command-examples">
+        <span class="example-chip">{{ region_prefix }}查定数 ma32</span>
+        <span class="example-chip">{{ region_prefix }}查定数 master 30-32</span>
+        <span class="example-chip">{{ region_prefix }}查定数 append</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="command-card">
+    <div class="command-head"><span class="command-name">查物量</span><span class="command-alias">物量</span></div>
+    <div class="command-body">
+      <div class="command-desc">按物量（note 数）查找歌曲，列出所有匹配的难度。</div>
+      <div class="command-examples"><span class="example-chip">{{ region_prefix }}查物量 1000</span><span class="example-chip">{{ region_prefix }}查物量 2500</span></div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<div class="command-group">
+  <div class="section-head" style="margin:18px 0 4px"><span class="section-bar"></span><h2 class="section-title">活动与卡池</h2><span class="section-sub">活动详情、卡池概率与模拟抽卡</span></div>
+
+  <div class="command-grid">
+  <div class="command-card">
+    <div class="command-head"><span class="command-name">查活动</span><span class="command-alias">活动 / event</span></div>
+    <div class="command-body">
+      <div class="command-desc">不带参数显示当前活动；带 ID 或名称显示详情，包含活动曲、加成角色与加成卡牌。</div>
+      <div class="command-examples"><span class="example-chip">{{ region_prefix }}查活动</span><span class="example-chip">{{ region_prefix }}查活动 200</span><span class="example-chip">{{ region_prefix }}活动一览</span></div>
+    </div>
+  </div>
+
+  <div class="command-card">
+    <div class="command-head"><span class="command-name">查卡池</span><span class="command-alias">卡池 / gacha</span></div>
+    <div class="command-body">
+      <div class="command-desc">不带参数显示当前卡池；带 ID、名称或 UP 卡牌名显示详情。卡池详情包含概率、UP 卡与抽取方式。</div>
+      <div class="command-examples"><span class="example-chip">{{ region_prefix }}查卡池</span><span class="example-chip">{{ region_prefix }}查卡池 30016</span><span class="example-chip">{{ region_prefix }}卡池列表</span></div>
+    </div>
+  </div>
+
+  <div class="command-card">
+    <div class="command-head"><span class="command-name">十连</span><span class="command-alias">N连 / N抽 / 抽卡 / 单抽</span></div>
+    <div class="command-body">
+      <div class="command-desc">模拟抽卡，不消耗任何资源。为避免日常聊天误触发，必须带 <b>pjsk</b> 或服务器前缀（如 cn十连、jp十连）。可指定角色、卡池 ID 与抽数，单次最多 100 抽。</div>
+      <div class="command-examples">
+        <span class="example-chip">pjsk十连</span>
+        <span class="example-chip">{{ switch_region_key }}十连</span>
+        <span class="example-chip">pjsk100抽</span>
+        <span class="example-chip">jp十连 miku 4053</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="command-card">
+    <div class="command-head"><span class="command-name">重置抽卡</span><span class="command-alias">重置抽数 / 清空抽卡</span></div>
+    <div class="command-body">
+      <div class="command-desc">清空当前用户在该服务器、该卡池的累计抽卡记录。国服与日服的记录分开计算。</div>
+      <div class="command-examples"><span class="example-chip">pjsk重置抽卡 30016</span><span class="example-chip">jp重置抽卡 4053</span></div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<div class="section-head" style="margin:18px 0 10px"><span class="section-bar"></span><h2 class="section-title">搜索技巧</h2><span class="section-sub">常用关键词</span></div>
+<div class="tip-panel">
+  <div><b>角色昵称</b>：miku、ick、saki、hnm、shiho、mnr、hrk、airi、shizuku、kohane、an、akito、toya、tsukasa、emu、nene、rui、kanade、mafuyu、ena、mizuki，也支持中文名与常见别名。</div>
+  <div style="margin-top:6px"><b>团名</b>：ln / mmj / vbs / ws / 25h / vs；<b>团 oc</b>：mmjoc、纯mmj；<b>团 vs</b>：mmjv；<b>纯 VS</b>：vs、纯v。</div>
+  <div style="margin-top:6px"><b>稀有度</b>：1 / 2 / 3 / 4 星、生日；<b>属性</b>：蓝 / 橙 / 紫 / 粉 / 绿；<b>限定</b>：非限、期间、fes、bfes、cfes、联动。</div>
+  <div style="margin-top:6px"><b>技能</b>：奶 / 分 / 判；<b>细分技能</b>：团分（组分）、p分、判分、血分、大分；<b>leak</b> 只看未实装卡。</div>
+  <div style="margin-top:6px"><b>卡牌活动筛选</b>：<b>event123</b> 按活动 ID 筛卡；<b>mnr1</b> 角色第 1 次箱活的卡牌；<b>miku-1</b> / <b>miku/1</b> 角色最新一张卡。前缀后也可跟分隔符：<b>jp/查卡</b>、<b>pjsk/查卡</b>。</div>
+  <div style="margin-top:6px"><b>难度</b>：EZ / NM / HD / EX / MA / AP，也接受 easy、normal、hard、expert、master、append。</div>
+  <div style="margin-top:6px"><b>歌曲特殊写法</b>：<b>id123</b> 按 ID；<b>#123</b> 按 ID；<b>-1</b> 最新发布；<b>mnr1</b> 角色第 1 次箱活；<b>event123</b> 活动书下曲。</div>
+</div>
+
+<div class="section-head" style="margin:18px 0 10px"><span class="section-bar"></span><h2 class="section-title">数据与致谢</h2><span class="section-sub">开放数据源</span></div>
+<div class="tip-panel">
+  <div><b>国服 MasterData</b>：Team-Haruki/haruki-sekai-sc-master；<b>日服 MasterData</b>：Team-Haruki/haruki-sekai-master。均按 GitHub API → jsDelivr → GitHub raw 三级降级。</div>
+  <div style="margin-top:6px"><b>游戏素材</b>：storage.exmeaning.com（国服 / 日服分目录）、moe.exmeaning.com；<b>歌曲翻译</b>：translation.exmeaning.com；<b>定数表</b>：pjskb30（社区整理，非官方，仅供参考）。</div>
+  <div style="margin-top:6px"><b>渲染</b>：AstrBot 内置 html_render（t2i）。界面与排版由 <b>mzkbot</b> 提供，Designed by 慵懒午睡。</div>
+</div>
+{% endblock %}

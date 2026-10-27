@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "_macros.html" import picture, mini_diffs, empty_state with context %}
+{% block content %}
+<header class="page-head">
+  <div class="head-main">
+    <div class="kicker">歌曲索引 <span class="region-chip">{{ region_label }}</span></div>
+    <h1 class="page-title">{{ title }}</h1>
+    <div class="page-sub">{{ subtitle }}</div>
+  </div>
+  <div class="page-side">
+    <div class="count-block"><b>{{ resolved.total }}</b><span>首歌曲</span></div>
+    <div class="page-hint">发送 <b>{{ region_prefix }}查曲 #ID</b> 查看详情 · <b>{{ region_prefix }}查曲绘 #ID</b> 获取曲绘</div>
+  </div>
+</header>
+
+{% if limit_note %}<div class="quote" style="margin:0 0 12px">{{ limit_note }}</div>{% endif %}
+
+{% if resolved.items %}
+<div class="card-grid" style="--cols:{{ columns }}">
+  {% for song in resolved.items %}
+  <div class="card-tile">
+    <div class="cover">
+      {{ picture(song.images.jacket_thumb, '', song.title, '', '♪') }}
+      <span class="tile-id">#{{ song.id }}</span>
+      {% if song.is_new %}<div class="corner-badge right"><span class="new-badge">NEW</span></div>{% endif %}
+    </div>
+    <div class="tile-body">
+      <div class="tile-title">{{ song.title }}</div>
+      <div class="tile-sub">{% if song.title_original %}{{ song.title_original }}{% else %}{{ song.composer }}{% endif %}</div>
+      {{ mini_diffs(song.difficulties) }}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+{{ empty_state('没有找到符合条件的歌曲', '试试歌曲名、别名、角色箱活（如 mnr1）或歌曲 ID。', resolved.suggestions) }}
+{% endif %}
+{% endblock %}

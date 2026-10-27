@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% from "_macros.html" import picture, attr_chip, rarity_badge, section_title, skill_card with context %}
+{% block content %}
+<header class="page-head">
+  <div class="head-main">
+    <div class="kicker">卡牌详情 <span class="region-chip">{{ region_label }}</span></div>
+    <h1 class="page-title">{{ card.character.full_name }} <span style="color:var(--faint);font-size:20px;font-weight:500">#{{ card.id }}</span></h1>
+    <div class="page-sub">{{ card.rarity.label }} · {{ card.attr.label }} · {{ card.supply.label }}</div>
+  </div>
+  <div class="page-side">
+    <div class="count-block"><b>{{ card.max_power | num }}</b><span>综合力</span></div>
+    <div class="page-hint">发送 <b>{{ region_prefix }}card {{ card.id }}</b> 获取卡面原图</div>
+  </div>
+</header>
+
+<div class="card-art-row{% if not card.has_after %} single{% endif %}">
+  <div class="art-card wide">
+    <div class="art-badge">{{ rarity_badge(card.rarity) }}{{ attr_chip(card.attr) }}{% if card.is_unreleased %}<span class="leak-badge">未实装</span>{% elif card.is_new %}<span class="new-badge">NEW</span>{% endif %}</div>
+    {{ picture(card.images.art_normal, '', card.title, '', '♪') }}
+    <div class="art-caption">{{ '花前' if card.has_after else '卡面' }} · {{ card.character.full_name }}</div>
+  </div>
+  {% if card.has_after %}
+  <div class="art-card wide">
+    <div class="art-badge">{{ rarity_badge(card.rarity) }}{{ attr_chip(card.attr) }}</div>
+    {{ picture(card.images.art_after, '', card.title, '', '♪') }}
+    <div class="art-caption">花后 · {{ card.character.full_name }}</div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="info-panel wide">
+  <div style="display:flex;align-items:center;gap:14px;min-width:0;flex-wrap:wrap">
+    {% if card.character.icon_url %}<img src="{{ card.character.icon_url }}" alt="" style="width:58px;height:58px;border-radius:50%;flex:0 0 58px;background:var(--surface-2)" onerror="this.style.display='none'">{% endif %}
+    <div style="min-width:0">
+      <div class="kicker">卡牌</div>
+      <h2 class="title" style="font-size:24px;margin-top:2px">{{ card.title }}</h2>
+      <div class="subtitle">{{ card.character.full_name }}{% if card.character.unit_label %} · {{ card.character.unit_label }}{% endif %}</div>
+    </div>
+    <div class="meta-row" style="margin:0 0 0 auto;justify-content:flex-end">
+      {{ rarity_badge(card.rarity) }}
+      {{ attr_chip(card.attr) }}
+      <span class="chip">{{ card.supply.label }}</span>
+      <span class="chip mono id-chip">#{{ card.id }}</span>
+      <span class="chip">发布于 {{ card.release_at }}</span>
+    </div>
+  </div>
+
+  {% if card.gacha_phrase %}
+  <div class="quote">「{{ card.gacha_phrase }}」</div>
+  {% endif %}
+
+  <div class="info-columns">
+    <div>
+      <div class="fact-grid" style="margin-top:0">
+        <div class="fact"><div class="fact-label">角色</div><div class="fact-value">{{ card.character.full_name }}</div></div>
+        <div class="fact"><div class="fact-label">所属团队</div><div class="fact-value">{{ card.character.unit_label or '—' }}</div></div>
+        <div class="fact"><div class="fact-label">获取方式</div><div class="fact-value">{{ card.supply.label }}</div></div>
+        <div class="fact"><div class="fact-label">技能类型</div><div class="fact-value">{{ card.skill.type_label if card.skill else '—' }}</div></div>
+      </div>
+
+      <div class="divider"></div>
+      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+        <div class="meta-label" style="white-space:nowrap">综合力</div>
+        <div style="font-size:30px;font-weight:600;color:var(--accent);line-height:1.1;font-variant-numeric:tabular-nums">{{ card.max_power | num }}</div>
+        <div class="meta-value" style="font-size:15px">({{ card.power_breakdown }})</div>
+      </div>
+      <div class="page-hint" style="margin-top:2px">满级、特训后、无剧情加成</div>
+    </div>
+
+    <div>
+      {{ skill_card(card.skill) }}
+      <div class="divider"></div>
+      <div class="fact-grid" style="margin-top:0;gap:8px 14px">
+        <div class="fact"><div class="fact-label">卡牌 ID</div><div class="fact-value mono">#{{ card.id }}</div></div>
+        <div class="fact"><div class="fact-label">发布时间</div><div class="fact-value">{{ card.release_at }}</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if card.event or card.gacha %}
+{% set banner_count = (1 if card.event else 0) + (1 if card.gacha else 0) %}
+<div class="banner-pair compact{% if banner_count == 1 %} single{% endif %}">
+  {% if card.event %}
+  <div class="banner-card">
+    {{ picture(card.images.event_banner, '', card.event.name, '', '♪') }}
+    <div class="banner-body">
+      <div class="banner-text">
+        <div class="banner-kicker">当期活动</div>
+        <div class="banner-name">{{ card.event.name }}</div>
+        <div class="banner-sub">{{ card.event.period }}</div>
+      </div>
+      <div class="banner-side">
+        {% if card.event.bonus_rate %}<span class="chip bonus-chip">加成 +{{ card.event.bonus_rate_label }}%</span>{% endif %}
+        <span class="banner-link">{{ region_prefix }}查活动 {{ card.event.id }}</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% if card.gacha %}
+  {% set gacha_banner = card.images.gacha_banner if card.images.gacha_banner[0] else card.images.art_normal %}
+  <div class="banner-card">
+    {{ picture(gacha_banner, '', card.gacha.name, '', '♪') }}
+    <div class="banner-body">
+      <div class="banner-text">
+        <div class="banner-kicker">当期卡池</div>
+        <div class="banner-name">{{ card.gacha.name }}</div>
+        <div class="banner-sub">{{ card.gacha.period }}</div>
+      </div>
+      <div class="banner-side">
+        {% if card.gacha.is_pickup %}<span class="chip bonus-chip">UP 卡</span>{% endif %}
+        <span class="banner-link">{{ region_prefix }}查卡池 {{ card.gacha.id }}</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if card.costumes %}
+{{ section_title('关联服饰', '卡牌实装时同步上架的 3D 服饰') }}
+<div class="costume-strip">
+  {% for costume in card.costumes %}
+  <div class="costume-block">
+    <div style="font-size:15.5px;font-weight:600">{{ costume.name }}</div>
+    <div style="display:flex;gap:9px;margin-top:7px">
+      {% for part in costume.parts %}
+      <div style="width:106px" class="costume-thumb">
+        {{ picture(part.images.thumb, '', costume.name, '', '衣') }}
+        <div class="page-hint" style="margin-top:3px;text-align:center">{{ part.label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

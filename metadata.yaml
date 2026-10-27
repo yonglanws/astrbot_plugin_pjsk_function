@@ -1,0 +1,7 @@
+name: astrbot_plugin_pjsk_function
+display_name: PJSK 查询插件
+desc: 世界计划 国服 / 日服 查卡、查曲、查活动、查卡池、模拟抽卡与图鉴，支持 card 卡面原图与查曲绘原图，页面由 AstrBot t2i 渲染为图片。
+short_desc: 世界计划国服 / 日服资料查询与模拟抽卡
+version: v2.1.0
+author: 慵懒午睡
+astrbot_version: ">=4.5.0"

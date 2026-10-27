@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% from "_macros.html" import picture, char_face, char_icon, difficulty_cards, section_title with context %}
+{% block content %}
+<header class="page-head">
+  <div class="head-main">
+    <div class="kicker">歌曲详情 <span class="region-chip">{{ region_label }}</span></div>
+    <h1 class="page-title">{{ song.title }}</h1>
+    <div class="page-sub">{% if song.title_original %}<b>{{ song.title_original }}</b>{% elif song.pronunciation %}{{ song.pronunciation }}{% else %}{{ song.composer }}{% endif %}</div>
+  </div>
+  <div class="page-side">
+    <div class="count-block"><b>#{{ song.id }}</b><span>歌曲 ID</span></div>
+    <div class="page-hint">发送 <b>{{ region_prefix }}查曲 {{ song.id }}</b> 或 <b>{{ region_prefix }}查曲绘 {{ song.id }}</b></div>
+  </div>
+</header>
+
+<div class="detail-top" style="grid-template-columns:400px minmax(0,1fr)">
+  <div class="art-column">
+    <div class="art-card square">
+      <div class="art-badge"><span class="chip">歌曲</span>{% if song.is_new %}<span class="new-badge">NEW</span>{% endif %}</div>
+      {{ picture(song.images.jacket, '', song.title, '', '♪') }}
+      <div class="art-caption">{{ song.composer }}</div>
+    </div>
+    {% if song.vocal_groups %}
+    <div class="side-panel">
+      <div class="side-title">演唱版本</div>
+      {% for group in song.vocal_groups %}
+      <div class="vocal-group">
+        <div class="vocal-title">{{ group.title }}<span>{{ group.characters | length }} 人</span></div>
+        <div class="char-row {% if group.characters | length > 1 %}icons{% endif %}">
+          {% if group.characters | length > 1 %}
+            {% for character in group.characters %}{{ char_icon(character) }}{% endfor %}
+          {% else %}
+            {% for character in group.characters %}{{ char_face(character) }}{% endfor %}
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="side-panel">
+      <div class="side-title">曲目信息</div>
+      <div class="fact-grid" style="margin-top:0;gap:8px 12px;grid-template-columns:repeat(2,minmax(0,1fr))">
+        <div class="fact"><div class="fact-label">时长</div><div class="fact-value">{{ song.duration or '—' }}</div></div>
+        <div class="fact"><div class="fact-label">歌曲 ID</div><div class="fact-value mono">#{{ song.id }}</div></div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="info-panel">
+    <div class="meta-row" style="margin-top:0">
+      <span class="chip mono id-chip">#{{ song.id }}</span>
+      {% for category in song.categories %}<span class="chip">{{ category }}</span>{% endfor %}
+      <span class="chip">发布于 {{ song.publish_at }}</span>
+      {% if song.has_duration %}<span class="chip">时长 {{ song.duration }}</span>{% endif %}
+    </div>
+
+    <div class="fact-grid" style="margin-top:12px">
+      <div class="fact"><div class="fact-label">作词</div><div class="fact-value">{{ song.lyricist }}</div></div>
+      <div class="fact"><div class="fact-label">作曲</div><div class="fact-value">{{ song.composer }}</div></div>
+      <div class="fact"><div class="fact-label">编曲</div><div class="fact-value">{{ song.arranger }}</div></div>
+      <div class="fact"><div class="fact-label">实装日期</div><div class="fact-value">{{ song.publish_at }}</div></div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-head" style="margin:0 0 9px">
+      <span class="section-bar"></span>
+      <h2 class="section-title">难度与物量</h2>
+      <span class="section-sub">定数来自社区，非官方</span>
+    </div>
+    {{ difficulty_cards(song.difficulties, 3) }}
+  </div>
+</div>
+
+{% if song.event %}
+<div class="banner-pair compact single solo">
+  <div class="banner-card">
+    {{ picture(song.images.event_banner, '', song.event.name, '', '♪') }}
+    <div class="banner-body">
+      <div class="banner-text">
+        <div class="banner-kicker">活动曲</div>
+        <div class="banner-name">{{ song.event.name }}</div>
+        <div class="banner-sub">{{ song.event.period }}</div>
+      </div>
+      <div class="banner-side">
+        <span class="banner-link">{{ region_prefix }}查活动 {{ song.event.id }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if song.aliases %}
+<div class="side-panel" style="margin-top:12px">
+  <div class="side-title">歌曲别名<span style="margin-left:8px;letter-spacing:0;text-transform:none;font-weight:400">{{ song.aliases | length }} 个</span></div>
+  <div class="meta-row" style="margin-top:0">
+    {% for alias in song.aliases %}<span class="chip" style="padding:4px 9px;font-size:13px">{{ alias }}</span>{% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

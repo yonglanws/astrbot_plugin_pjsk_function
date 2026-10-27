@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from "_macros.html" import card_face_pair, supply_tag, empty_state with context %}
+{% block content %}
+<header class="page-head">
+  <div class="head-main">
+    <div class="kicker">卡牌索引 <span class="region-chip">{{ region_label }}</span></div>
+    <h1 class="page-title">{{ title }}</h1>
+    <div class="page-sub">{{ subtitle }}</div>
+  </div>
+  {% if not guide %}
+  <div class="page-side">
+    <div class="count-block"><b>{{ resolved.total }}</b><span>张卡牌</span></div>
+    <div class="page-hint">发送 <b>{{ region_prefix }}查卡 #ID</b> 查看详情 · <b>{{ region_prefix }}card #ID</b> 获取原图</div>
+  </div>
+  {% endif %}
+</header>
+
+{% if guide %}
+<div class="filter-guide">
+  <div class="filter-card">
+    <h3>按角色</h3>
+    <p>角色昵称、中文名或团名，可与稀有度组合。</p>
+    <div class="filter-examples"><span class="chip">miku</span><span class="chip">25h</span><span class="chip">ln 4星</span></div>
+  </div>
+  <div class="filter-card">
+    <h3>按稀有度 / 属性</h3>
+    <p>1–4 星、生日，属性支持蓝 / 橙 / 紫 / 粉 / 绿。</p>
+    <div class="filter-examples"><span class="chip">miku 4</span><span class="chip">生日</span><span class="chip">粉 4星</span></div>
+  </div>
+  <div class="filter-card">
+    <h3>按获取方式</h3>
+    <p>限定类型、技能类型与年份都可以直接写在查询里。</p>
+    <div class="filter-examples"><span class="chip">限定 分卡</span><span class="chip">2025年</span><span class="chip">非限</span></div>
+  </div>
+</div>
+<div class="quote" style="margin-top:14px">
+  用法：<b>{{ region_prefix }}查卡 条件</b>，例如 <b>{{ region_prefix }}查卡 miku 4</b>。
+  数字会先当作卡牌 ID；只有一张结果时直接打开详情。
+</div>
+{% elif resolved.items %}
+{% if limit_note %}<div class="quote" style="margin:0 0 12px">{{ limit_note }}</div>{% endif %}
+<div class="card-grid" style="--cols:{{ columns }}">
+  {% for card in resolved.items %}
+  <div class="card-tile">
+    <div class="cover pair">
+      {{ card_face_pair(card) }}
+      {{ supply_tag(card.supply) }}
+      {% if card.is_new %}<div class="corner-badge"><span class="new-badge">NEW</span></div>{% endif %}
+    </div>
+    <div class="tile-body">
+      <div class="tile-title">{{ card.title }}</div>
+      <div class="tile-sub">#{{ card.id }} · {{ card.character.full_name }}</div>
+      <div class="tile-foot">
+        <span class="chip">{{ card.rarity.label }}</span>
+        <span class="chip">{{ card.attr.label }}</span>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+{{ empty_state('没有找到符合条件的卡牌', '试试角色昵称、稀有度、属性、团名或年份，例如「miku 4」「25h 生日」「2025年 4星」。', resolved.suggestions) }}
+{% endif %}
+{% endblock %}

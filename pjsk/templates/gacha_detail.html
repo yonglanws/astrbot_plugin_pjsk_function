@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from "_macros.html" import picture, state_pill, section_title, card_face_pair, supply_tag with context %}
+{% block content %}
+{% set has_banner = gacha.images.banner[0] %}
+{% set hero = gacha.images.banner if has_banner else gacha.images.banner_fallback %}
+<header class="page-head">
+  <div class="head-main">
+    <div class="kicker">卡池详情 <span class="region-chip">{{ region_label }}</span></div>
+    <h1 class="page-title">卡池 #{{ gacha.id }}</h1>
+    <div class="page-sub">概率、UP 卡与抽取方式</div>
+  </div>
+  <div class="page-side">
+    <div class="count-block"><b>{{ gacha.pickups | length }}</b><span>张 UP 卡</span></div>
+    <div class="page-hint">发送 <b>{{ required_prefix }}十连 {{ gacha.id }}</b> 模拟抽卡</div>
+  </div>
+</header>
+
+<div class="gacha-hero">
+  {{ picture(hero, gacha.images.banner_fallback[0] if has_banner else '', gacha.name, 'hero-bg', '♪') }}
+  <div class="event-state">{{ state_pill(gacha.status, gacha.status_label) }}</div>
+  <div class="gacha-hero-inner">
+    <h2 class="gacha-title">{{ gacha.name }}</h2>
+    <div class="gacha-meta">
+      <span class="chip">#{{ gacha.id }}</span>
+      <span class="chip">{{ gacha.period_label }}</span>
+      <span class="chip">{{ gacha.details_count }} 张可抽卡牌</span>
+      {% if gacha.has_ten_guarantee %}<span class="chip">{{ gacha.guarantee_label }}</span>{% endif %}
+    </div>
+  </div>
+</div>
+
+{% if gacha.rates %}
+{{ section_title('稀有度概率', '卡池公布的基础概率') }}
+<div class="rate-table">
+  <div class="rate-row rate-head"><div>稀有度</div><div>概率分布</div><div style="text-align:right">概率</div><div style="text-align:right">说明</div></div>
+  {% for rate in gacha.rates %}
+  <div class="rate-row" style="--rarity:{{ rate.color }}">
+    <div class="rate-name"><span class="dot"></span>{{ rate.label }}</div>
+    <div class="rate-bar"><span style="width:{{ rate.rate }}%"></span></div>
+    <div class="rate-num">{{ rate.rate_label }}</div>
+    <div class="rate-note">{% if rate.key == 'rarity_4' %}最高稀有度{% elif rate.key == 'rarity_3' %}10 连保底{% else %}常规{% endif %}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if gacha.pickups %}
+{{ section_title('当期 UP 卡牌', '概率为单抽命中该卡的理论值') }}
+<div class="card-grid" style="--cols:{{ gacha.pickup_columns }}">
+  {% for card in gacha.pickups %}
+  <div class="card-tile">
+    <div class="cover pair">
+      {{ card_face_pair(card) }}
+      {{ supply_tag(card.supply) }}
+    </div>
+    <div class="tile-body">
+      <div class="tile-title">{{ card.title }}</div>
+      <div class="tile-sub">#{{ card.id }} · {{ card.character.full_name }}</div>
+      <div class="tile-foot">
+        <span class="chip">{{ card.rarity.label }}</span>
+        <span class="chip">{{ card.attr.label }}</span>
+        <span class="chip">单抽 {{ card.rate_label }}</span>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if gacha.behaviors %}
+{{ section_title('抽取方式', '模拟抽卡不消耗任何资源') }}
+{% set behavior_cols = 2 if gacha.behaviors | length >= 4 else (gacha.behaviors | length or 1) %}
+<div class="behavior-grid" style="grid-template-columns:repeat({{ behavior_cols }},minmax(0,1fr))">
+  {% for behavior in gacha.behaviors %}
+  <div class="behavior">
+    <div class="behavior-label">{{ behavior.label }}</div>
+    <div class="behavior-costs">
+      {% for cost in behavior.costs %}<span class="chip">{{ cost }}</span>{% endfor %}
+    </div>
+    <div class="behavior-limit">{% if behavior.spins %}每次 {{ behavior.spins }} 抽{% endif %}{% if behavior.limit %} · 限 {{ behavior.limit }} 次{% elif behavior.mixed_limit %} · 部分方式限次{% endif %}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if gacha.summary %}
+{{ section_title('卡池说明') }}
+<div class="summary-panel">{{ gacha.summary }}</div>
+{% endif %}
+{% endblock %}

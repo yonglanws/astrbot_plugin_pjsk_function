@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 插件运行时数据（自动生成，勿提交）
+data/master/
+data/cache/
+data/renders/
+data/gacha_state.json
+data/img/
+data/img_cache/
+tests/output/
+res/misans-subset.ttf
+# 字体源文件：仅构建子集时需要；Demibold 未被使用
+data/MiSans-Demibold.ttf
+*.bak
+
+# 本地安全扫描记录（工具状态，勿公开）
+.mimosa/

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% from "_macros.html" import picture, char_face, state_pill, section_title, card_face_pair, supply_tag with context %}
+{% block content %}
+<header class="page-head">
+  <div class="head-main">
+    <div class="kicker">活动详情 <span class="region-chip">{{ region_label }}</span></div>
+    <h1 class="page-title">活动 #{{ event.id }}</h1>
+    <div class="page-sub">{{ event.type_label }} · {{ event.unit.label }}</div>
+  </div>
+  <div class="page-side">
+    <div class="count-block"><b>{{ event.bonus_cards | length }}</b><span>张加成卡</span></div>
+    <div class="page-hint">发送 <b>{{ region_prefix }}查活动 {{ event.id }}</b> · <b>{{ region_prefix }}活动一览</b></div>
+  </div>
+</header>
+
+<div class="event-hero">
+  {{ picture(event.images.banner, '', event.name, 'hero-bg', '♪') }}
+  <div class="event-state">{{ state_pill(event.status, event.status_label) }}</div>
+  <div class="event-hero-inner">
+    <h2 class="event-title">{{ event.name }}</h2>
+    <div class="event-meta">
+      <span class="chip">#{{ event.id }}</span>
+      <span class="chip">{{ event.type_label }}</span>
+      <span class="chip">{{ event.unit.label }}</span>
+      <span class="chip">{{ event.period_label }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="event-info">
+  <div class="info-box"><div class="info-label">开始时间</div><div class="info-value">{{ event.start_at }}</div></div>
+  <div class="info-box"><div class="info-label">结束时间</div><div class="info-value">{{ event.end_at }}</div></div>
+  <div class="info-box"><div class="info-label">加成角色</div><div class="info-value">{{ event.bonus_characters | length }} 人</div></div>
+  <div class="info-box"><div class="info-label">加成卡牌</div><div class="info-value">{{ event.bonus_cards | length }} 张</div></div>
+</div>
+
+{% if event.song %}
+{{ section_title('活动曲', '书下曲 / 活动追加曲') }}
+<div class="event-song">
+  {{ picture(event.song.images.jacket_thumb, '', event.song.title, '', '♪') }}
+  <div class="song-main">
+    <div class="song-title">{{ event.song.title }}</div>
+    <div class="song-sub">{% if event.song.title_original %}{{ event.song.title_original }}{% else %}歌曲 #{{ event.song.id }}{% endif %}</div>
+    <div class="song-diffs">
+      {% for diff in event.song.difficulties %}
+      <span class="mini-diff" style="--diff:{{ diff.color }}">{{ diff.short }} <b>{{ diff.level }}</b></span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="song-side">歌曲 #{{ event.song.id }}<br>{{ region_prefix }}查曲 {{ event.song.id }}</div>
+</div>
+{% endif %}
+
+{% if event.bonus_characters %}
+{{ section_title('加成角色', '活动卡牌所属角色') }}
+<div class="side-panel inline-panel">
+  <div class="char-row">
+    {% for character in event.bonus_characters %}
+      {% if character.icon_url %}{{ char_face(character) }}{% else %}<span class="char-chip plain">{{ character.full_name }}</span>{% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if event.bonus_cards %}
+{{ section_title('加成卡牌', '按加成比例排序') }}
+<div class="card-grid" style="--cols:{{ event.bonus_columns }}">
+  {% for card in event.bonus_cards %}
+  <div class="card-tile">
+    <div class="cover pair">
+      {{ card_face_pair(card) }}
+      {{ supply_tag(card.supply) }}
+    </div>
+    <div class="tile-body">
+      <div class="tile-title">{{ card.title }}</div>
+      <div class="tile-sub">#{{ card.id }} · {{ card.character.full_name }}</div>
+      <div class="tile-foot">
+        <span class="chip">{{ card.rarity.label }}</span>
+        <span class="chip">{{ card.attr.label }}</span>
+        <span class="chip">{{ card.bonus_rate_label }}% 加成</span>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

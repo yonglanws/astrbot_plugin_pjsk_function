@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "_macros.html" import picture, state_pill, empty_state with context %}
+{% block content %}
+<header class="page-head">
+  <div class="head-main">
+    <div class="kicker">卡池索引 <span class="region-chip">{{ region_label }}</span></div>
+    <h1 class="page-title">{{ title }}</h1>
+    <div class="page-sub">按匹配度排序 · 进行中的卡池排在前面</div>
+  </div>
+  <div class="page-side">
+    <div class="count-block"><b>{{ resolved.total }}</b><span>个卡池</span></div>
+    <div class="page-hint">发送 <b>{{ region_prefix }}查卡池 #ID</b> 查看详情 · <b>{{ required_prefix }}十连 #ID</b> 模拟抽卡</div>
+  </div>
+</header>
+
+{% if limit_note %}<div class="quote" style="margin:0 0 12px">{{ limit_note }}</div>{% endif %}
+
+{% if resolved.items %}
+<div class="card-grid" style="--cols:{{ columns }}">
+  {% for gacha in resolved.items %}
+  {% set has_banner = gacha.images.banner[0] %}
+  {% set banner = gacha.images.banner if has_banner else gacha.images.banner_fallback %}
+  <div class="item-card">
+    <div class="item-cover wide">
+      {{ picture(banner, gacha.images.banner_fallback[0] if has_banner else '', gacha.name, '', '♪') }}
+      <div style="position:absolute;top:9px;left:9px;z-index:2">{{ state_pill(gacha.status, gacha.status_label) }}</div>
+      <span class="id-tag">#{{ gacha.id }}</span>
+    </div>
+    <div class="item-body">
+      <div class="item-title">{{ gacha.name }}</div>
+      <div class="item-sub">{{ gacha.period_label }}</div>
+      <div style="display:flex;gap:6px;margin-top:9px">
+        {% for pickup in gacha.pickups %}
+        <div style="position:relative;width:46px;height:46px;border-radius:9px;overflow:hidden;background:var(--surface-2)" class="mini-thumb">
+          {{ picture(pickup.images.thumb, '', pickup.title, '', '♪') }}
+        </div>
+        {% endfor %}
+        {% if gacha.pickup_count > 4 %}<span class="chip" style="align-self:center;padding:3px 8px;font-size:13px">+{{ gacha.pickup_count - 4 }}</span>{% endif %}
+      </div>
+      <div class="item-foot"><span class="chip" style="padding:3px 8px;font-size:13.5px">{{ gacha.pickup_count }} 张 UP</span></div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+{{ empty_state('没有找到匹配的卡池', '试试卡池名、卡池 ID 或 UP 卡牌名。', []) }}
+{% endif %}
+{% endblock %}

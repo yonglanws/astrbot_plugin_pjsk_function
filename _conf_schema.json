@@ -1,0 +1,60 @@
+{
+  "default_region": {
+    "description": "默认查询服务器",
+    "type": "string",
+    "default": "cn",
+    "hint": "cn = 国服（默认），jp = 日服。发送 cn查卡 / jp查卡 可临时切换；两个服务器的 MasterData 都会同步。"
+  },
+  "auto_sync": {
+    "description": "每日自动同步 MasterData",
+    "type": "bool",
+    "default": true,
+    "hint": "启动时也会检查一次；版本未变化时只读取版本文件，不会重复下载。"
+  },
+  "sync_hour": {
+    "description": "每日同步时间（小时）",
+    "type": "int",
+    "default": 4,
+    "slider": { "min": 0, "max": 23, "step": 1 },
+    "hint": "固定在第 30 分钟执行。"
+  },
+  "render_endpoint": {
+    "description": "可选：直连 t2i 回退地址",
+    "type": "string",
+    "default": "",
+    "hint": "默认使用 AstrBot 自带的 html_render（读取 AstrBot 配置中的 t2i_endpoint）。只有内置接口失败时才使用这里填写的地址；可填 http://127.0.0.1:8999 或 http://127.0.0.1:8999/text2img，留空表示不回退。"
+  },
+  "render_timeout": {
+    "description": "单张图片渲染超时（秒）",
+    "type": "int",
+    "default": 120,
+    "slider": { "min": 20, "max": 300, "step": 5 }
+  },
+  "image_timeout": {
+    "description": "卡面 / 曲绘 / 立绘下载超时（秒）",
+    "type": "int",
+    "default": 60,
+    "slider": { "min": 10, "max": 300, "step": 5 },
+    "hint": "页面中的图片会下载后以 data URI 内嵌，避免渲染服务访问外网失败。"
+  },
+  "sync_timeout": {
+    "description": "单个数据表下载超时（秒）",
+    "type": "int",
+    "default": 90,
+    "slider": { "min": 20, "max": 300, "step": 5 }
+  },
+  "data_source_bases": {
+    "description": "可选：日服 MasterData 镜像（按顺序优先尝试）",
+    "type": "list",
+    "default": [],
+    "items": { "type": "string" },
+    "hint": "填日服仓库根的镜像地址，例如 https://cdn.jsdelivr.net/gh/Team-Haruki/haruki-sekai-master@main。留空则使用内置的 GitHub API → jsDelivr → GitHub raw 三级降级。"
+  },
+  "cn_data_source_bases": {
+    "description": "可选：国服 MasterData 镜像（按顺序优先尝试）",
+    "type": "list",
+    "default": [],
+    "items": { "type": "string" },
+    "hint": "填国服仓库根的镜像地址，例如 https://cdn.jsdelivr.net/gh/Team-Haruki/haruki-sekai-sc-master@main（数据文件在其 master/ 目录下）。留空则使用内置三级降级。"
+  }
+}

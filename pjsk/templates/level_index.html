@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_state with context %}
+{% block content %}
+<header class="page-head">
+  <div class="head-main">
+    <div class="kicker">难度索引 <span class="region-chip">{{ region_label }}</span></div>
+    <h1 class="page-title">{{ diff.label }} 难度等级</h1>
+    <div class="page-sub">选择等级查看该难度下的全部歌曲</div>
+  </div>
+  <div class="page-side">
+    <div class="count-block"><b>{{ total }}</b><span>首歌曲</span></div>
+    <div class="page-hint">发送 <b>{{ region_prefix }}查曲 {{ diff.short }} 32</b> 查看等级 32 的歌曲</div>
+  </div>
+</header>
+
+<div class="meta-row" style="margin:0 0 12px">
+  {% for tab in difficulty_tabs %}
+  <span class="chip" style="{% if tab.selected %}--band:{{ tab.color }};color:color-mix(in srgb,{{ tab.color }} 76%, #17181a);background:color-mix(in srgb,{{ tab.color }} 10%, #ffffff);border-color:color-mix(in srgb,{{ tab.color }} 26%, #ffffff){% endif %}">{{ tab.label }} <b style="margin-left:4px;font-variant-numeric:tabular-nums">{{ tab.count }}</b></span>
+  {% endfor %}
+</div>
+
+{% if levels %}
+<div class="level-grid">
+  {% for level in levels %}
+  <div class="level-tile" style="--diff:{{ diff.color }}">
+    <div class="num">{{ level.level }}</div>
+    <div class="count">{{ level.count }} 首</div>
+    <div class="bar"><span style="width:{{ level.width }}%"></span></div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+{{ empty_state('暂无歌曲', '这个难度还没有已发布的歌曲。') }}
+{% endif %}
+{% endblock %}

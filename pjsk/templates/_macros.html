@@ -1,0 +1,152 @@
+{# Shared image, chip and layout helpers. #}
+{% macro img(src, fb='', alt='', cls='') -%}
+<img class="{{ cls }}" src="{{ src }}" alt="{{ alt }}" loading="eager"
+     {%- if fb %} data-fb="{{ fb }}" onerror="if(this.dataset.fb){this.src=this.dataset.fb;this.removeAttribute('data-fb')}else{this.style.display='none'}"{% else %} onerror="this.style.display='none'"{% endif %}>
+{%- endmacro %}
+
+{% macro picture(src, fb='', alt='', cls='', fallback='♪') -%}
+<div class="pic {{ cls }}">
+  <div class="pic-fallback"><span>{{ fallback }}</span></div>
+  {{ img(src, fb, alt, 'pic-img') }}
+</div>
+{%- endmacro %}
+
+{% macro attr_chip(attr, show_text=true) -%}
+{% if attr and attr.label %}<span class="chip attr-chip" style="--attr:{{ attr.color }}" title="{{ attr.label }}">{% if icons.attrs[attr.key] %}<img class="attr-icon" src="{{ icons.attrs[attr.key] }}" alt="{{ attr.label }}">{% else %}<i class="dot"></i>{% endif %}{% if show_text or not icons.attrs[attr.key] %}{{ attr.label }}{% endif %}</span>{% endif %}
+{%- endmacro %}
+
+{% macro rarity_badge(rarity) -%}
+<span class="rarity" style="--rarity:{{ rarity.color }}">{{ rarity.label }}</span>
+{%- endmacro %}
+
+{% macro supply_tag(supply) -%}
+{% if supply and supply.tag %}<span class="supply-tag">{{ supply.tag }}</span>{% endif %}
+{%- endmacro %}
+
+{% macro band_pill(label, color) -%}
+{% if label %}<span class="chip band-chip" style="--band:{{ color }}"><i class="dot"></i>{{ label }}</span>{% endif %}
+{%- endmacro %}
+
+{% macro char_face(character) -%}
+<span class="char-chip" title="{{ character.full_name }}">
+  {% if character.icon_url %}<img class="char-face" src="{{ character.icon_url }}" alt="{{ character.full_name }}" loading="eager" onerror="this.style.display='none'">{% endif %}
+  <span>{{ character.full_name }}</span>
+</span>
+{%- endmacro %}
+
+{% macro char_plain(character) -%}
+<span class="char-chip plain" style="border-color:color-mix(in srgb,{{ character.unit_color }} 26%, #ffffff);background:color-mix(in srgb,{{ character.unit_color }} 7%, #ffffff)">{{ character.full_name }}</span>
+{%- endmacro %}
+
+{% macro difficulty_cards(difficulties, cols=3) -%}
+{% set count = difficulties | length %}
+{% set auto_cols = 2 if count == 4 else cols %}
+<div class="diff-grid{% if count == 5 %} five{% endif %}" style="grid-template-columns:repeat({{ auto_cols }},minmax(0,1fr))">
+  {% for diff in difficulties %}
+  <div class="diff-card{% if diff.selected %} is-selected{% endif %}" style="--diff:{{ diff.color }}">
+    <div class="diff-top"><span class="diff-label">{{ diff.label }}</span><span class="diff-notes">{{ diff.notes }} 物量</span></div>
+    <div class="diff-level">{{ diff.level }}</div>
+    {% if diff.constant is not none %}<div class="diff-const">定数 {{ diff.constant_label }} · 非官方</div>{% endif %}
+    <div class="diff-track"><span style="width:{{ diff.track }}%"></span></div>
+  </div>
+  {% endfor %}
+</div>
+{%- endmacro %}
+
+{% macro mini_diffs(difficulties) -%}
+<div class="tile-foot diffs">
+  {% for diff in difficulties %}
+  <span class="mini-diff{% if diff.selected %} is-selected{% endif %}" style="--diff:{{ diff.color }}">{{ diff.short }} <b>{{ diff.level }}</b></span>
+  {% endfor %}
+</div>
+{%- endmacro %}
+
+{% macro section_title(title, sub='') -%}
+<div class="section-head">
+  <span class="section-bar"></span>
+  <h2 class="section-title">{{ title }}</h2>
+  {% if sub %}<span class="section-sub">{{ sub }}</span>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro skill_card(skill) -%}
+{% if skill %}
+{% set max_level = skill.levels[-1] if skill.levels else none %}
+<article class="skill-card skill-wide">
+  <div class="skill-head">
+    <div class="skill-icon text">{{ skill.short or '技' }}</div>
+    <div class="skill-main">
+      <div class="skill-label">{{ skill.type_label }}{% if skill.id %} <span class="skill-id">#{{ skill.id }}</span>{% endif %}</div>
+      <div class="skill-name">{{ skill.name }}</div>
+    </div>
+    {% if max_level %}<span class="skill-level-tag">Lv.{{ max_level.level }}</span>{% endif %}
+  </div>
+  {% if max_level %}
+  <div class="skill-desc">{{ max_level.description or '—' }}</div>
+  <div class="skill-note">Lv.1–{{ skill.levels | length }} · 以上为满级效果</div>
+  {% elif skill.description %}
+  <div class="skill-desc">{{ skill.description }}</div>
+  {% endif %}
+</article>
+{% endif %}
+{%- endmacro %}
+
+{% macro char_icon(character) -%}
+{% if character.icon_url %}<img class="char-face" src="{{ character.icon_url }}" alt="{{ character.full_name }}" title="{{ character.full_name }}" loading="eager" onerror="this.style.display='none'">{% else %}<span class="char-chip plain" style="font-size:12px;padding:3px 8px">{{ character.full_name }}</span>{% endif %}
+{%- endmacro %}
+
+{% macro card_face_pair(item) -%}
+{% if item.is_unreleased %}<div class="corner-badge"><span class="leak-badge">未实装</span></div>{% endif %}
+<div class="pair-thumbs">
+  {% if item.has_after %}
+  <div class="thumb">
+    {{ picture(item.images.thumb_normal, '', item.title, '', '♪') }}
+    {% if icons.frames[item.rarity.key] %}<img class="thumb-frame" src="{{ icons.frames[item.rarity.key] }}" alt="" loading="eager" onerror="this.style.display='none'">{% endif %}
+    {% if icons.attrs[item.attr.key] %}<img class="thumb-attr" src="{{ icons.attrs[item.attr.key] }}" alt="" loading="eager" onerror="this.style.display='none'">{% endif %}
+    <div class="thumb-stars">
+      {% for _ in range(item.rarity.num) %}<img src="{{ icons.stars[item.rarity.key if item.rarity.is_birthday else 'normal'] }}" alt="" loading="eager" onerror="this.style.display='none'">{% endfor %}
+    </div>
+    {% if item.skill_type and item.skill_type != '分' %}<span class="thumb-skill-text">{{ item.skill_type }}</span>{% endif %}
+  </div>
+  <div class="thumb">
+    {{ picture(item.images.thumb_after, '', item.title, '', '♪') }}
+    {% if icons.frames[item.rarity.key] %}<img class="thumb-frame" src="{{ icons.frames[item.rarity.key] }}" alt="" loading="eager" onerror="this.style.display='none'">{% endif %}
+    {% if icons.attrs[item.attr.key] %}<img class="thumb-attr" src="{{ icons.attrs[item.attr.key] }}" alt="" loading="eager" onerror="this.style.display='none'">{% endif %}
+    <div class="thumb-stars">
+      {% for _ in range(item.rarity.num) %}<img src="{{ icons.stars['after'] if not item.rarity.is_birthday else 'birthday' }}" alt="" loading="eager" onerror="this.style.display='none'">{% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <div class="thumb solo">
+    {% if item.images.thumb_normal %}<span class="thumb-blur" style="background-image:url('{{ item.images.thumb_normal }}')"></span>{% endif %}
+    <div class="solo-card">
+      {{ picture(item.images.thumb_normal, '', item.title, '', '♪') }}
+      {% if icons.frames[item.rarity.key] %}<img class="thumb-frame" src="{{ icons.frames[item.rarity.key] }}" alt="" loading="eager" onerror="this.style.display='none'">{% endif %}
+      {% if icons.attrs[item.attr.key] %}<img class="thumb-attr" src="{{ icons.attrs[item.attr.key] }}" alt="" loading="eager" onerror="this.style.display='none'">{% endif %}
+      <div class="thumb-stars">
+        {% for _ in range(item.rarity.num) %}<img src="{{ icons.stars[item.rarity.key if item.rarity.is_birthday else 'normal'] }}" alt="" loading="eager" onerror="this.style.display='none'">{% endfor %}
+      </div>
+      {% if item.skill_type and item.skill_type != '分' %}<span class="thumb-skill-text">{{ item.skill_type }}</span>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro state_pill(status, label) -%}
+<span class="state-pill {% if status == 'ongoing' %}live{% elif status == 'upcoming' %}soon{% else %}over{% endif %}">{{ label }}</span>
+{%- endmacro %}
+
+{% macro empty_state(title, text, suggestions=[]) -%}
+<div class="empty">
+  <div class="empty-icon">♪</div>
+  <div class="empty-title">{{ title }}</div>
+  <div class="empty-text">{{ text }}</div>
+  {% if suggestions %}
+  <div class="empty-suggest">
+    <span>你是不是想找：</span>
+    {% for item in suggestions %}<span class="suggest-chip">{{ item }}</span>{% endfor %}
+  </div>
+  {% endif %}
+</div>
+{%- endmacro %}

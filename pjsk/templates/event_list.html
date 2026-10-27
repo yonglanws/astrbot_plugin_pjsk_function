@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "_macros.html" import picture, state_pill, empty_state with context %}
+{% block content %}
+<header class="page-head">
+  <div class="head-main">
+    <div class="kicker">活动一览 <span class="region-chip">{{ region_label }}</span></div>
+    <h1 class="page-title">{{ title }}</h1>
+    <div class="page-sub">按开始时间从新到旧 · 进行中的活动排在前面</div>
+  </div>
+  <div class="page-side">
+    <div class="count-block"><b>{{ resolved.total }}</b><span>个活动</span></div>
+    <div class="page-hint">发送 <b>{{ region_prefix }}查活动 #ID</b> 查看详情</div>
+  </div>
+</header>
+
+{% if limit_note %}<div class="quote" style="margin:0 0 12px">{{ limit_note }}</div>{% endif %}
+
+{% if resolved.items %}
+<div class="event-grid" style="--card-w:340px;--card-width:calc(33.333% - 9.4px)">
+  {% for event in resolved.items %}
+  <div class="event-card">
+    <div class="event-cover">
+      {{ picture(event.images.banner, '', event.name, 'event-cover-img', '♪') }}
+      <div class="event-cover-shade"></div>
+      {{ state_pill(event.status, event.status_label) }}
+      <span class="event-id">#{{ event.id }}</span>
+    </div>
+    <div class="event-body">
+      <div class="event-name">{{ event.name }}</div>
+      <div class="event-period">{{ event.period_label }}</div>
+      <div class="event-chips">
+        <span class="chip" style="padding:3px 9px;font-size:13.5px">{{ event.type_label }}</span>
+        <span class="chip" style="padding:3px 9px;font-size:13.5px">{{ event.unit.short or event.unit.label }}</span>
+      </div>
+      <div class="event-songline">{% if event.song %}活动曲：{{ event.song.title }}{% else %}暂无活动曲{% endif %}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+{{ empty_state('没有找到活动', '试试活动名、活动 ID 或团名。', []) }}
+{% endif %}
+{% endblock %}

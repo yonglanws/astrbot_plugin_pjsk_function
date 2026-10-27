@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% from "_macros.html" import picture, attr_chip, rarity_badge, band_pill, section_title with context %}
+{% block content %}
+<div class="catalog-hero">
+  <div class="catalog-kicker">PJSK DATABASE · {{ region_short }}</div>
+  <div class="catalog-title">世界计划 图鉴 · {{ region_label }}</div>
+  <div class="catalog-desc">卡牌、歌曲、活动与卡池的一站式索引。默认查询{{ default_region_label }}；发送「{{ switch_region_key }} 查卡」可切换到{{ switch_region_label }}。</div>
+  <div class="catalog-meta">
+    <span>卡牌<b>{{ stats.cards | num }}</b></span>
+    <span>歌曲<b>{{ stats.songs | num }}</b></span>
+    <span>活动<b>{{ stats.events | num }}</b></span>
+    <span>卡池<b>{{ stats.gachas | num if stats.gachas else '按需' }}</b></span>
+  </div>
+</div>
+
+<div class="catalog-grid">
+  <div class="catalog-tile">
+    <div class="icon">卡</div>
+    <div class="count">{{ stats.cards | num }}</div>
+    <div class="label">卡牌</div>
+    <div class="cmd">{{ region_prefix }}查卡 · {{ region_prefix }}卡牌列表 · {{ region_prefix }}card</div>
+  </div>
+  <div class="catalog-tile">
+    <div class="icon">曲</div>
+    <div class="count">{{ stats.songs | num }}</div>
+    <div class="label">歌曲</div>
+    <div class="cmd">{{ region_prefix }}查曲 · {{ region_prefix }}查曲绘 · {{ region_prefix }}随个</div>
+  </div>
+  <div class="catalog-tile">
+    <div class="icon">活</div>
+    <div class="count">{{ stats.events | num }}</div>
+    <div class="label">活动</div>
+    <div class="cmd">{{ region_prefix }}查活动 · {{ region_prefix }}活动一览</div>
+  </div>
+  <div class="catalog-tile">
+    <div class="icon">池</div>
+    <div class="count">{{ stats.gachas | num if stats.gachas else '—' }}</div>
+    <div class="label">卡池</div>
+    <div class="cmd">{{ region_prefix }}查卡池 · {{ required_prefix }}十连</div>
+  </div>
+</div>
+
+{% if stats.ongoing_events %}
+{{ section_title('正在进行', '当前开放的活动') }}
+<div class="side-panel">
+  {% for event in stats.ongoing_events %}
+  <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--outline-soft)">
+    <span class="chip mono" style="padding:3px 8px;font-size:13px">#{{ event.id }}</span>
+    <span style="font-size:16px;font-weight:500;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ event.name }}</span>
+    <span class="page-hint" style="margin:0">{{ event.period_label }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{{ section_title('数据分布', '按稀有度、属性与团队统计') }}
+<div class="breakdown-grid">
+  <div class="breakdown-card">
+    <div class="breakdown-head">稀有度</div>
+    {% for row in stats.rarities %}
+    <div class="breakdown-row" style="--band:{{ row.color }}">
+      <span class="name">{{ row.label }}</span>
+      <span class="breakdown-bar"><span style="width:{{ (row.count / stats.cards * 100) | round(1) }}%"></span></span>
+      <span class="num">{{ row.count }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="breakdown-card">
+    <div class="breakdown-head">属性</div>
+    {% for row in stats.attrs %}
+    <div class="breakdown-row" style="--band:{{ row.color }}">
+      <span class="name">{{ row.label }}</span>
+      <span class="breakdown-bar"><span style="width:{{ (row.count / stats.cards * 100) | round(1) }}%"></span></span>
+      <span class="num">{{ row.count }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="breakdown-card">
+    <div class="breakdown-head">团队</div>
+    {% for row in stats.units %}
+    <div class="breakdown-row" style="--band:{{ row.color }}">
+      <span class="name">{{ row.short or row.label }}</span>
+      <span class="breakdown-bar"><span style="width:{{ (row.count / stats.cards * 100) | round(1) }}%"></span></span>
+      <span class="num">{{ row.count }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{{ section_title('难度收录', '各难度的谱面数量') }}
+<div class="side-panel">
+  <div class="meta-row" style="margin:0">
+    {% for row in stats.difficulties %}
+    <span class="chip" style="--band:{{ row.color }};color:color-mix(in srgb,{{ row.color }} 76%, #17181a);background:color-mix(in srgb,{{ row.color }} 9%, #ffffff);border-color:color-mix(in srgb,{{ row.color }} 24%, #ffffff)">{{ row.label }} <b style="margin-left:4px;font-variant-numeric:tabular-nums">{{ row.count }}</b></span>
+    {% endfor %}
+  </div>
+</div>
+
+{{ section_title('最新收录', '最近发布的卡牌与歌曲') }}
+<div class="latest-grid">
+  <div class="latest-card">
+    <div class="latest-head"><div class="latest-main">最新卡牌</div></div>
+    {% for card in stats.latest_cards %}
+    <div class="latest-row">
+      <div class="latest-thumb">{{ picture(card.images.thumb_normal, '', card.title, '', '♪') }}</div>
+      <div class="latest-main">
+        <div class="latest-title">{{ card.title }}</div>
+        <div class="latest-sub">{{ card.character.full_name }} · {{ card.rarity.label }} · {{ card.attr.label }}</div>
+      </div>
+      <div class="latest-date">#{{ card.id }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="latest-card">
+    <div class="latest-head"><div class="latest-main">最新歌曲</div></div>
+    {% for song in stats.latest_songs %}
+    <div class="latest-row">
+      <div class="latest-thumb">{{ picture(song.images.jacket_thumb, '', song.title, '', '♪') }}</div>
+      <div class="latest-main">
+        <div class="latest-title">{{ song.title }}</div>
+        <div class="latest-sub">{{ song.composer }}{% if song.title_original %} · {{ song.title_original }}{% endif %}</div>
+      </div>
+      <div class="latest-date">#{{ song.id }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

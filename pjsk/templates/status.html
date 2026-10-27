@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-head">
+  <div class="head-main">
+    <div class="kicker">数据源状态</div>
+    <h1 class="page-title">MasterData 同步状态</h1>
+    <div class="page-sub">默认查询 <b>{{ default_region_label }}</b> · 国服与日服独立缓存、独立同步</div>
+  </div>
+  <div class="page-side">
+    <div class="count-block"><b>{{ regions | length }}</b><span>个服务器</span></div>
+    <div class="page-hint">发送 <b>update</b> 检查更新 · <b>更新数据源</b> 强制刷新</div>
+  </div>
+</header>
+
+{% for region in regions %}
+<div class="region-block">
+  <div class="region-head">
+    <span class="region-name">{{ region.label }}</span>
+    <span class="region-chip">{{ region.short }}</span>
+    {% if region.is_default %}<span class="chip" style="padding:3px 9px;font-size:13px">默认</span>{% endif %}
+    <div class="region-meta">
+      版本 <b>{{ region.version or '未知' }}</b> · {{ region.ok_count }}/{{ region.total_count }} 个文件{% if region.last_update %} · {{ region.last_update }}{% endif %}
+    </div>
+  </div>
+
+  <div class="source-table" style="border:0;box-shadow:none;padding:0;margin-top:10px">
+    <div class="source-row source-head"><div>数据源</div><div>状态</div><div>延迟</div><div>版本 / 错误</div></div>
+    {% for source in region.sources %}
+    <div class="source-row">
+      <div class="source-name">{{ source.name }}</div>
+      {% if source.status == 200 %}
+      <div class="source-ok">HTTP 200</div>
+      {% elif source.status %}
+      <div class="source-bad">HTTP {{ source.status }}</div>
+      {% else %}
+      <div class="source-bad">连接失败</div>
+      {% endif %}
+      <div class="source-num">{{ source.elapsed }}s</div>
+      <div class="source-num" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ source.version or source.error or '—' }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="file-grid" style="margin-top:10px">
+    {% for file in region.files %}
+    <div class="file-item {% if file.exists %}ok{% else %}missing{% endif %}">
+      <span class="dot"></span>
+      <span class="name">{{ file.name }}</span>
+      <span class="size">{{ file.size_label }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+<div class="quote" style="margin-top:14px">
+  自动更新每天执行一次，国服与日服会分别检查版本；全部数据源失败时继续使用本地缓存。
+  管理员可发送「更新数据源」强制全量刷新两个服务器，或用「拉取 jp cards.json」单独更新某个文件。
+</div>
+{% endblock %}

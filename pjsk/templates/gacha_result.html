@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "_macros.html" import picture, rarity_badge, empty_state with context %}
+{% block content %}
+<header class="page-head">
+  <div class="head-main">
+    <div class="kicker">模拟抽卡 <span class="region-chip">{{ region_label }}</span></div>
+    <h1 class="page-title">{{ gacha.name }}</h1>
+    <div class="page-sub">本次 <b>{{ count }}</b> 抽{% if char_name %} · 仅 {{ char_name }}{% endif %} · 不消耗任何资源</div>
+  </div>
+  <div class="page-side">
+    <div class="count-block"><b>{{ count }}</b><span>抽</span></div>
+    <div class="page-hint">发送 <b>{{ required_prefix }}重置抽卡 {{ gacha.id }}</b> 清空累计记录</div>
+  </div>
+</header>
+
+{% if results %}
+{% set result_cols = [results | length, 5] | min %}
+<div class="result-grid" style="grid-template-columns:repeat({{ result_cols }},minmax(0,1fr)){% if result_cols < 5 %};max-width:{{ result_cols * 196 + (result_cols - 1) * 12 }}px;margin-left:auto;margin-right:auto{% endif %}">
+  {% for card in results %}
+  <div class="result-card">
+    <div style="position:relative">
+      {{ picture(card.images.art, '', card.title, '', '♪') }}
+      <div class="result-badge">{{ rarity_badge(card.rarity) }}</div>
+      {% if card.is_pickup %}<div class="result-pickup">UP</div>{% endif %}
+    </div>
+    <div class="result-body">
+      <div class="result-title">{{ card.title }}</div>
+      <div class="result-sub">{{ card.character.full_name }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="result-summary">
+  <div class="result-stat"><div class="label">本次抽数</div><div class="value">{{ count }}<small>抽</small></div></div>
+  <div class="result-stat"><div class="label">本次 ★4</div><div class="value">{{ stats.session_rarity.get('4', 0) }}<small>张</small></div></div>
+  <div class="result-stat"><div class="label">本次 ★3</div><div class="value">{{ stats.session_rarity.get('3', 0) }}<small>张</small></div></div>
+  <div class="result-stat"><div class="label">本次当期 UP</div><div class="value">{{ stats.session_pickups }}<small>张</small></div></div>
+</div>
+
+<div class="side-panel" style="margin-top:14px">
+  <div class="side-title">累计记录</div>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:baseline">
+    <span style="font-size:17px">累计 <b style="font-size:24px;color:var(--accent);font-variant-numeric:tabular-nums">{{ stats.total_pulls }}</b> 抽</span>
+    <span class="chip">★4 × {{ stats.total_rarity.get('4', 0) }}</span>
+    <span class="chip">★3 × {{ stats.total_rarity.get('3', 0) }}</span>
+    <span class="chip">当期 UP × {{ stats.total_pickups }}</span>
+    <span class="page-hint" style="margin:0">记录按用户与卡池分别保存</span>
+  </div>
+</div>
+
+{% if requested > 100 %}
+<div class="quote" style="margin-top:12px">你请求了 {{ requested }} 抽，单次最多模拟 100 抽，已按 100 抽执行。</div>
+{% endif %}
+{% else %}
+{{ empty_state('没有抽到任何卡牌', '这个卡池暂无可抽取内容，或角色过滤后没有可用卡牌。', []) }}
+{% endif %}
+{% endblock %}
