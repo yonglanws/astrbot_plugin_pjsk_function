@@ -35,6 +35,13 @@ USER_AGENT = (
     "Chrome/124.0 Safari/537.36"
 )
 
+# QQ's official bot API rejects images above 4 MB (base64 single-shot upload),
+# and after-training card art converts to a 4.2+ MB PNG. Anything above this
+# budget is re-encoded as a high-quality JPEG at the same resolution so the
+# picture still goes through instead of being dropped silently.
+SEND_IMAGE_MAX_BYTES = 3_500_000
+SEND_JPEG_QUALITY = 92
+
 
 def _is_public_address(value: str) -> bool:
     try:
@@ -239,7 +246,7 @@ class AssetService:
 
     # -- raw artwork -------------------------------------------------------
     async def fetch_file(self, url: str) -> Path | None:
-        """Downloads an original asset for direct sending; converts WebP to PNG."""
+        """Downloads an original asset for direct sending, ready to upload."""
         url = (url or "").strip()
         if not url:
             return None
@@ -251,9 +258,9 @@ class AssetService:
         if suffix != ".png":
             converted = cached.with_suffix(".png")
             if converted.is_file() and converted.stat().st_size > 0:
-                return converted
+                return await self._sendable(converted)
         if cached.is_file() and cached.stat().st_size > 0:
-            return await self._prefer_png(cached)
+            return await self._sendable(cached)
         raw = await self.fetch_bytes(url)
         if not raw:
             return None
@@ -264,7 +271,40 @@ class AssetService:
         except OSError:
             return None
         self._cleanup_raw()
-        return await self._prefer_png(cached)
+        return await self._sendable(cached)
+
+    @classmethod
+    async def _sendable(cls, path: Path) -> Path:
+        """A PNG/JPEG path that fits the platform's image upload limit."""
+        if path.suffix.lower() == ".webp":
+            path = await cls._prefer_png(path)
+        try:
+            if path.stat().st_size <= SEND_IMAGE_MAX_BYTES:
+                return path
+        except OSError:
+            return path
+        jpeg = path.with_suffix(".jpg")
+        if jpeg.is_file() and jpeg.stat().st_size > 0:
+            return jpeg
+
+        def convert() -> None:
+            from PIL import Image
+
+            with Image.open(path) as image:
+                canvas = image.convert("RGBA")
+                background = Image.new("RGB", canvas.size, (255, 255, 255))
+                background.paste(canvas, mask=canvas.split()[3])
+                background.save(
+                    jpeg, "JPEG", quality=SEND_JPEG_QUALITY, optimize=True, progressive=True
+                )
+
+        try:
+            await asyncio.to_thread(convert)
+        except Exception:  # noqa: BLE001 - fall back to the PNG
+            return path
+        if jpeg.is_file() and jpeg.stat().st_size > 0:
+            return jpeg
+        return path
 
     @staticmethod
     async def _prefer_png(path: Path) -> Path:

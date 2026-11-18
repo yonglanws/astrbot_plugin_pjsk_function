@@ -13,7 +13,9 @@ runs offline.
 from __future__ import annotations
 
 import asyncio
+import shutil
 import sys
+import tempfile
 import time
 from pathlib import Path
 from types import SimpleNamespace
@@ -570,6 +572,34 @@ async def run() -> None:
     options = service._options(1080, "png", 90, "high")
     check("viewport_width" in options and "viewport_height" in options, "flat viewport keys")
     check("viewport" not in options, "no nested viewport object")
+
+    # -- send-size budget --------------------------------------------------
+    # QQ's official bot API rejects images above 4 MB, so oversized artwork is
+    # re-encoded as JPEG before sending (after-training art is ~4.2 MB as PNG).
+    from pjsk import assets as assets_module
+    from pjsk.assets import AssetService
+
+    tmp_dir = Path(tempfile.mkdtemp())
+    try:
+        big = tmp_dir / "big.png"
+        from PIL import Image as PILImage
+
+        PILImage.effect_noise((900, 900), 64).convert("RGB").save(big, "PNG")
+        budget = assets_module.SEND_IMAGE_MAX_BYTES
+        assets_module.SEND_IMAGE_MAX_BYTES = 1000
+        try:
+            sendable = await AssetService._sendable(big)
+        finally:
+            assets_module.SEND_IMAGE_MAX_BYTES = budget
+        check(
+            sendable.suffix == ".jpg" and sendable.stat().st_size < big.stat().st_size,
+            "oversized art falls back to JPEG",
+        )
+        small = tmp_dir / "small.png"
+        PILImage.new("RGB", (32, 32), (255, 0, 0)).save(small, "PNG")
+        check(await AssetService._sendable(small) == small, "small art keeps its PNG")
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
 
     # -- no leftover references -----------------------------------------
     banned = "luna" + "bot"
